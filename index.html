@@ -169,17 +169,15 @@
       const dragContainer = document.getElementById("dragContainer");
       const dropContainer = document.getElementById("dropContainer");
 
-      // Reset
       dragContainer.innerHTML = "";
       dropContainer.innerHTML = "";
       pontuacao = { acertos: 0, erros: 0 };
       atualizarPontuacao();
 
-      // Copia e embaralha
       dados = [...dadosOriginais];
       embaralhar(dados);
 
-      // Criar museus
+      // Criar museus (arrastáveis)
       dados.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "draggable";
@@ -187,6 +185,8 @@
         div.setAttribute("draggable", true);
         div.setAttribute("data-museu", item.museu);
         div.style.backgroundColor = cores[index % cores.length];
+        div.style.opacity = "1";
+        div.style.cursor = "grab";
 
         div.addEventListener("dragstart", (e) => {
           e.dataTransfer.setData("text/plain", item.museu);
@@ -195,7 +195,7 @@
         dragContainer.appendChild(div);
       });
 
-      // Criar zonas de drop
+      // Criar áreas para soltar (estados)
       const estadosUnicos = [...new Set(dados.map(item => item.estado))];
       estadosUnicos.forEach(estado => {
         const dropZone = document.createElement("div");
@@ -206,51 +206,55 @@
         label.textContent = estado;
         dropZone.appendChild(label);
 
-        dropZone.addEventListener("dragover", (e) => e.preventDefault());
+        dropZone.addEventListener("dragover", e => e.preventDefault());
 
-        dropZone.addEventListener("drop", (e) => {
+        dropZone.addEventListener("drop", e => {
           e.preventDefault();
           const museuNome = e.dataTransfer.getData("text/plain");
           const estadoAlvo = dropZone.getAttribute("data-estado");
           const itemCorreto = dadosOriginais.find(d => d.museu === museuNome);
 
-          // Verifica se já existe e remove se sim
+          // Remove item antigo se já existir nessa zona (evita duplicidade)
           const antigo = dropZone.querySelector(`[data-museu="${museuNome}"]`);
           if (antigo) antigo.remove();
 
-          const droppedItem = document.createElement("div");
-          droppedItem.className = "dropped-item";
-          droppedItem.setAttribute("data-museu", museuNome);
-          droppedItem.textContent = museuNome;
-
-          // Verificação
           if (itemCorreto && itemCorreto.estado === estadoAlvo) {
-            droppedItem.classList.remove("incorrect");
-            droppedItem.classList.add("correct");
+            const droppedItem = document.createElement("div");
+            droppedItem.className = "dropped-item correct";
+            droppedItem.setAttribute("data-museu", museuNome);
+            droppedItem.textContent = museuNome;
+
             pontuacao.acertos++;
+
+            // Desativa o museu na lista superior
+            const original = document.querySelector(`[data-museu="${museuNome}"]`);
+            if (original) {
+              original.setAttribute("draggable", false);
+              original.style.opacity = "0.5";
+              original.style.cursor = "not-allowed";
+            }
+
+            dropZone.appendChild(droppedItem);
           } else {
-            droppedItem.classList.remove("correct");
-            droppedItem.classList.add("incorrect");
             pontuacao.erros++;
+
+            // Reativa o museu na lista superior para nova tentativa
+            const original = document.querySelector(`[data-museu="${museuNome}"]`);
+            if (original) {
+              original.setAttribute("draggable", true);
+              original.style.opacity = "1";
+              original.style.cursor = "grab";
+            }
+            // NÃO adiciona o museu incorreto na área do estado
           }
 
           atualizarPontuacao();
-          dropZone.appendChild(droppedItem);
-
-          // Reativar se quiser corrigir depois
-          const original = document.querySelector(`[data-museu="${museuNome}"]`);
-          if (original) {
-            original.style.opacity = "0.5";
-            original.style.cursor = "not-allowed";
-            original.setAttribute("draggable", false);
-          }
         });
 
         dropContainer.appendChild(dropZone);
       });
     }
 
-    // Iniciar automaticamente
     iniciarJogo();
   </script>
 </body>
