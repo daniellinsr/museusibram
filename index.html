@@ -96,9 +96,58 @@
         min-width: 100%;
       }
     }
+	
+	#mensagemFinal {
+	  position: fixed;
+	  top: 20%;
+	  left: 50%;
+	  transform: translate(-50%, -50%) scale(0.8);
+	  background-color: #4caf50;
+	  color: white;
+	  padding: 1.5rem 2rem;
+	  border-radius: 12px;
+	  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+	  font-size: 1.4rem;
+	  font-weight: bold;
+	  text-align: center;
+	  display: none;
+	  opacity: 0;
+	  z-index: 1000;
+	  animation: fadeZoom 0.6s ease forwards;
+	}
+
+	@keyframes fadeZoom {
+	  0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.8);
+	  }
+	  100% {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	  }
+	}
+
+	/* Confetes animados */
+	.confetes::before, .confetes::after {
+	  content: '🎊 🎉 🎈 🎊 🎉 🎈';
+	  display: block;
+	  font-size: 1.5rem;
+	  animation: flutuar 3s infinite ease-in-out;
+	}
+
+	@keyframes flutuar {
+	  0% { transform: translateY(0); opacity: 1; }
+	  50% { transform: translateY(-10px); opacity: 0.7; }
+	  100% { transform: translateY(0); opacity: 1; }
+	}
+
   </style>
 </head>
 <body>
+	<div id="mensagemFinal">
+	  🎉 Parabéns! Você concluiu o jogo! <br> <strong>Conheça nossos Museus!</strong>
+	  <div class="confetes"></div>
+	</div>
 
   <h2>Conheça os Museus do Ibram - Arraste o museu até o estado correto</h2>
   <div class="controls">
@@ -112,6 +161,22 @@
   </div>
 
   <script>
+	  function mostrarMensagemFinal() {
+		  const msg = document.getElementById("mensagemFinal");
+		  msg.style.display = "block";
+		  msg.style.opacity = "1";
+		  msg.style.animation = "fadeZoom 0.6s ease forwards";
+
+		  setTimeout(() => {
+			msg.style.opacity = "0";
+			msg.style.transition = "opacity 0.5s ease";
+			setTimeout(() => {
+			  msg.style.display = "none";
+			}, 500);
+		  }, 4000);
+		}
+
+
     const dadosOriginais = [
       { museu: "Museu Casa da Hera", estado: "Rio de Janeiro"},
       { museu: "Museu Casa de Benjamin Constant", estado: "Rio de Janeiro"},
@@ -216,6 +281,10 @@
             droppedItem.textContent = museuNome;
 
             pontuacao.acertos++;
+			
+			if (pontuacao.acertos === dadosOriginais.length) {
+			  mostrarMensagemFinal();
+			}
 
             // Remover da parte superior
             const original = document.querySelector(`#dragContainer [data-museu="${museuNome}"]`);
