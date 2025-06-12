@@ -85,15 +85,10 @@
       border-radius: 6px;
       color: white;
       display: inline-block;
-      cursor: grab;
     }
 
     .correct {
       background-color: #28a745;
-    }
-
-    .incorrect {
-      background-color: #dc3545;
     }
 
     @media (max-width: 600px) {
@@ -177,7 +172,6 @@
       dados = [...dadosOriginais];
       embaralhar(dados);
 
-      // Criar museus (arrastáveis)
       dados.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "draggable";
@@ -185,8 +179,6 @@
         div.setAttribute("draggable", true);
         div.setAttribute("data-museu", item.museu);
         div.style.backgroundColor = cores[index % cores.length];
-        div.style.opacity = "1";
-        div.style.cursor = "grab";
 
         div.addEventListener("dragstart", (e) => {
           e.dataTransfer.setData("text/plain", item.museu);
@@ -195,7 +187,6 @@
         dragContainer.appendChild(div);
       });
 
-      // Criar áreas para soltar (estados)
       const estadosUnicos = [...new Set(dados.map(item => item.estado))];
       estadosUnicos.forEach(estado => {
         const dropZone = document.createElement("div");
@@ -214,7 +205,7 @@
           const estadoAlvo = dropZone.getAttribute("data-estado");
           const itemCorreto = dadosOriginais.find(d => d.museu === museuNome);
 
-          // Remove item antigo se já existir nessa zona (evita duplicidade)
+          // Se já tiver sido adicionado anteriormente, remove
           const antigo = dropZone.querySelector(`[data-museu="${museuNome}"]`);
           if (antigo) antigo.remove();
 
@@ -226,26 +217,24 @@
 
             pontuacao.acertos++;
 
-            // Desativa o museu na lista superior
-            const original = document.querySelector(`[data-museu="${museuNome}"]`);
+            // Remover da parte superior
+            const original = document.querySelector(`#dragContainer [data-museu="${museuNome}"]`);
             if (original) {
-              original.setAttribute("draggable", false);
-              original.style.opacity = "0.5";
-              original.style.cursor = "not-allowed";
+              original.remove();
             }
 
             dropZone.appendChild(droppedItem);
           } else {
             pontuacao.erros++;
 
-            // Reativa o museu na lista superior para nova tentativa
-            const original = document.querySelector(`[data-museu="${museuNome}"]`);
+            // Reativa na parte superior
+            const original = document.querySelector(`#dragContainer [data-museu="${museuNome}"]`);
             if (original) {
               original.setAttribute("draggable", true);
               original.style.opacity = "1";
               original.style.cursor = "grab";
             }
-            // NÃO adiciona o museu incorreto na área do estado
+            // Não adiciona nada na área de drop
           }
 
           atualizarPontuacao();
