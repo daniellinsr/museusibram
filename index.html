@@ -3,202 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jogo Educativo - Museus e Estados</title>
+  <title>Jogo Educativo - Museus</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
-      background-color: #f0f2f5;
+      padding: 1rem;
+      background-color: #f5f5f5;
+    }
+
+    h2 {
       text-align: center;
+      margin-bottom: 1rem;
     }
-    h1 {
-      margin-bottom: 10px;
-    }
-    #score {
-      margin: 10px 0 20px;
-      font-weight: bold;
-      font-size: 1.2em;
-    }
-    .game-container {
+
+    .container {
       display: flex;
       flex-direction: column;
-      gap: 40px;
-      align-items: center;
+      gap: 2rem;
     }
-    .draggables, .dropzones {
+
+    .drag-container, .drop-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 15px;
+      gap: 1rem;
     }
+
     .draggable {
-      padding: 10px 15px;
-      border-radius: 8px;
+      padding: 0.5rem 1rem;
       color: white;
-      font-weight: bold;
+      border-radius: 8px;
       cursor: grab;
+      font-weight: bold;
       user-select: none;
     }
-    .dropzone {
-      width: 180px;
-      height: 60px;
-      padding: 10px;
-      border: 2px dashed #888;
-      background-color: #fff;
-      border-radius: 10px;
+
+    .droppable {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      min-width: 200px;
+      min-height: 60px;
+      background-color: white;
+      text-align: center;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s ease;
+      transition: background-color 0.3s ease;
     }
-    .dropzone.correct {
-      background-color: #d4edda;
+
+    .correct {
+      background-color: #d4edda !important;
       border-color: #28a745;
-      color: #155724;
     }
-    .dropzone.incorrect {
-      background-color: #f8d7da;
+
+    .incorrect {
+      background-color: #f8d7da !important;
       border-color: #dc3545;
-      color: #721c24;
     }
-    @media (max-width: 768px) {
-      .draggable, .dropzone {
-        width: 90%;
-        font-size: 0.95em;
+
+    @media (max-width: 600px) {
+      .droppable {
+        min-width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Associe o Museu ao Estado Correto</h1>
-  <div id="score">Pontuação: 0</div>
-  <div class="game-container">
-    <div class="draggables" id="museus"></div>
-    <div class="dropzones" id="estados"></div>
+
+  <h2>Arraste o museu para o estado correto</h2>
+
+  <div class="container">
+    <div class="drag-container" id="dragContainer"></div>
+    <div class="drop-container" id="dropContainer"></div>
   </div>
 
   <script>
     const dados = [
       { museu: "Museu Casa da Hera", estado: "Rio de Janeiro},
-      { museu: "Museu Casa de Benjamin Constant", estado: "Rio de Janeiro},
-      { museu: "Museu da Abolição", estado: "Pernambuco},
-      { museu: "Museu da Incondifência", estado: "Minas Gerais},
-      { museu: "Museu da República", estado: "Rio de Janeiro},
-      { museu: "Museu das Missões", estado: "Rio Grande do Sul},
-      { museu: "Museu de Alcantara", estado: "Maranhão},
-      { museu: "Museu de Arqueologia de Itaipu", estado: "Rio de Janeiro},
-      { museu: "Museu de Arte de Paraty", estado: "Rio de Janeiro},
-      { museu: "Museu de Arte Religiosa e Tradicional", estado: "Rio de Janeiro},
-      { museu: "Museu do Diamante", estado: "Minas Gerais},
-      { museu: "Museu do Ouro", estado: "Minas Gerais},
-      { museu: "Museu Forte Defensor Perpétuo", estado: "Rio de Janeiro},
-      { museu: "Museu Histórico Nacional", estado: "Rio de Janeiro},
-      { museu: "Museu Lasar Segall", estado: "São Paulo},
-      { museu: "Museu Regional Casa dos Ottoni", estado: "Minas Gerais},
-      { museu: "Museu Regional de Caete", estado: "Minas Gerais},
-      { museu: "Museu Regional de São João Del Rei", estado: "Minas Gerais},
-      { museu: "Museu Solar Monjardim", estado: "Espírito Santo},
-      { museu: "Museu Victor Meirelles", estado: "Santa Catarina},
-      { museu: "Museu Villa Lobos", estado: "Rio de Janeiro},
-      { museu: "Museus Castro Maya", estado: "Rio de Janeiro},
-      { museu: "Museus de Goiás", estado: "Goiás}
+      { museu: "Museu Casa de Benjamin Constant", estado: "Rio de Janeiro"},
+      { museu: "Museu da Abolição", estado: "Pernambuco"},
+      { museu: "Museu da Incondifência", estado: "Minas Gerais"},
+      { museu: "Museu da República", estado: "Rio de Janeiro"},
+      { museu: "Museu das Missões", estado: "Rio Grande do Sul"},
+      { museu: "Museu de Alcantara", estado: "Maranhão"},
+      { museu: "Museu de Arqueologia de Itaipu", estado: "Rio de Janeiro"},
+      { museu: "Museu de Arte de Paraty", estado: "Rio de Janeiro"},
+      { museu: "Museu de Arte Religiosa e Tradicional", estado: "Rio de Janeiro"},
+      { museu: "Museu do Diamante", estado: "Minas Gerais"},
+      { museu: "Museu do Ouro", estado: "Minas Gerais"},
+      { museu: "Museu Forte Defensor Perpétuo", estado: "Rio de Janeiro"},
+      { museu: "Museu Histórico Nacional", estado: "Rio de Janeiro"},
+      { museu: "Museu Lasar Segall", estado: "São Paulo"},
+      { museu: "Museu Regional Casa dos Ottoni", estado: "Minas Gerais"},
+      { museu: "Museu Regional de Caete", estado: "Minas Gerais"},
+      { museu: "Museu Regional de São João Del Rei", estado: "Minas Gerais"},
+      { museu: "Museu Solar Monjardim", estado: "Espírito Santo"},
+      { museu: "Museu Victor Meirelles", estado: "Santa Catarina"},
+      { museu: "Museu Villa Lobos", estado: "Rio de Janeiro"},
+      { museu: "Museus Castro Maya", estado: "Rio de Janeiro"},
+      { museu: "Museus de Goiás", estado: "Goiás"}
     ];
 
-    cconst cores = [
-    "#007bff", "#17a2b8", "#6f42c1", "#fd7e14", "#20c997", "#e83e8c", "#28a745", "#ffc107",
-    "#6610f2", "#dc3545", "#6c757d", "#343a40", "#ff5722", "#00bcd4", "#8bc34a", "#ff9800",
-    "#9c27b0", "#3f51b5", "#795548", "#009688", "#c2185b", "#4caf50", "#ffeb3b"
+    const cores = [
+      "#007bff", "#17a2b8", "#6f42c1", "#fd7e14", "#20c997", "#e83e8c",
+      "#28a745", "#ffc107", "#6610f2", "#dc3545", "#6c757d", "#343a40",
+      "#ff5722", "#00bcd4", "#8bc34a", "#ff9800", "#9c27b0", "#3f51b5",
+      "#795548", "#009688", "#c2185b", "#4caf50", "#ffeb3b"
     ];
-    let pontuacao = 0;
-    let acertos = new Set();
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
+    const dragContainer = document.getElementById("dragContainer");
+    const dropContainer = document.getElementById("dropContainer");
 
-    function initGame() {
-      const museusContainer = document.getElementById("museus");
-      const estadosContainer = document.getElementById("estados");
+    // Criar elementos arrastáveis
+    dados.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "draggable";
+      div.textContent = item.museu;
+      div.setAttribute("draggable", true);
+      div.setAttribute("data-museu", item.museu);
+      div.style.backgroundColor = cores[index % cores.length];
 
-      const museus = [...dados];
-      shuffle(museus);
-
-      museus.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "draggable";
-        div.draggable = true;
-        div.id = `museu-${index}`;
-        div.textContent = item.museu;
-        div.dataset.estado = item.estado;
-        div.style.backgroundColor = cores[index % cores.length];
-
-        div.addEventListener("dragstart", dragStart);
-        museusContainer.appendChild(div);
+      div.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", item.museu);
       });
 
-      const estadosUnicos = [...new Set(dados.map(d => d.estado))];
-      estadosUnicos.forEach(estado => {
-        const drop = document.createElement("div");
-        drop.className = "dropzone";
-        drop.dataset.estado = estado;
-        drop.textContent = estado;
+      dragContainer.appendChild(div);
+    });
 
-        drop.addEventListener("dragover", dragOver);
-        drop.addEventListener("drop", handleDrop);
-        estadosContainer.appendChild(drop);
+    // Criar áreas de drop únicas por estado
+    const estadosUnicos = [...new Set(dados.map(item => item.estado))];
+
+    estadosUnicos.forEach(estado => {
+      const div = document.createElement("div");
+      div.className = "droppable";
+      div.setAttribute("data-estado", estado);
+      div.textContent = estado;
+
+      div.addEventListener("dragover", (e) => {
+        e.preventDefault();
       });
-    }
 
-    function dragStart(event) {
-      event.dataTransfer.setData("text/plain", event.target.id);
-    }
+      div.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const museuNome = e.dataTransfer.getData("text/plain");
+        const estadoAlvo = div.getAttribute("data-estado");
 
-    function dragOver(event) {
-      event.preventDefault();
-    }
+        const itemCorreto = dados.find(d => d.museu === museuNome);
 
-    function handleDrop(event) {
-      event.preventDefault();
-      const dropzone = event.currentTarget;
-      const draggedId = event.dataTransfer.getData("text/plain");
-      const dragged = document.getElementById(draggedId);
-
-      if (!dragged) return;
-
-      const estadoCorreto = dragged.dataset.estado;
-      const estadoDestino = dropzone.dataset.estado;
-
-      dropzone.innerHTML = '';
-      dropzone.appendChild(dragged);
-
-      if (estadoCorreto === estadoDestino) {
-        dropzone.classList.add("correct");
-        dropzone.classList.remove("incorrect");
-
-        if (!acertos.has(draggedId)) {
-          pontuacao++;
-          acertos.add(draggedId);
+        div.classList.remove("correct", "incorrect");
+        if (itemCorreto.estado === estadoAlvo) {
+          div.classList.add("correct");
+          div.textContent = `${estadoAlvo} ✅ ${museuNome}`;
+        } else {
+          div.classList.add("incorrect");
+          div.textContent = `${estadoAlvo} ❌ ${museuNome}`;
         }
 
-        dragged.draggable = false;
-        dragged.style.cursor = "default";
-      } else {
-        dropzone.classList.add("incorrect");
-        dropzone.classList.remove("correct");
-      }
+        // Desativar item já usado
+        const itemArrastado = document.querySelector(`[data-museu="${museuNome}"]`);
+        if (itemArrastado) {
+          itemArrastado.setAttribute("draggable", false);
+          itemArrastado.style.opacity = 0.5;
+          itemArrastado.style.cursor = "default";
+        }
+      });
 
-      document.getElementById("score").textContent = `Pontuação: ${pontuacao}`;
-    }
-
-    initGame();
+      dropContainer.appendChild(div);
+    });
   </script>
 </body>
 </html>
