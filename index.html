@@ -159,8 +159,38 @@
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      const dadosOriginais = [...]; // (Coloque os dados dos museus aqui como antes)
-      const cores = [...]; // (Paleta de cores como antes)
+      const dadosOriginais = [
+      { museu: "Museu Casa da Hera", estado: "Rio de Janeiro"},
+      { museu: "Museu Casa de Benjamin Constant", estado: "Rio de Janeiro"},
+      { museu: "Museu da Abolição", estado: "Pernambuco"},
+      { museu: "Museu da Inconfidência", estado: "Minas Gerais"},
+      { museu: "Museu da República", estado: "Rio de Janeiro"},
+      { museu: "Museu das Missões", estado: "Rio Grande do Sul"},
+      { museu: "Museu de Alcantara", estado: "Maranhão"},
+      { museu: "Museu de Arqueologia de Itaipu", estado: "Rio de Janeiro"},
+      { museu: "Museu de Arte de Paraty", estado: "Rio de Janeiro"},
+      { museu: "Museu de Arte Religiosa e Tradicional", estado: "Rio de Janeiro"},
+      { museu: "Museu do Diamante", estado: "Minas Gerais"},
+      { museu: "Museu do Ouro", estado: "Minas Gerais"},
+      { museu: "Museu Forte Defensor Perpétuo", estado: "Rio de Janeiro"},
+      { museu: "Museu Histórico Nacional", estado: "Rio de Janeiro"},
+      { museu: "Museu Lasar Segall", estado: "São Paulo"},
+      { museu: "Museu Regional Casa dos Ottoni", estado: "Minas Gerais"},
+      { museu: "Museu Regional de Caete", estado: "Minas Gerais"},
+      { museu: "Museu Regional de São João Del Rei", estado: "Minas Gerais"},
+      { museu: "Museu Solar Monjardim", estado: "Espírito Santo"},
+      { museu: "Museu Victor Meirelles", estado: "Santa Catarina"},
+      { museu: "Museu Villa Lobos", estado: "Rio de Janeiro"},
+      { museu: "Museus Castro Maya", estado: "Rio de Janeiro"},
+      { museu: "Museus de Goiás", estado: "Goiás"}
+    ];
+
+    const cores = [
+      "#007bff", "#17a2b8", "#6f42c1", "#fd7e14", "#20c997", "#e83e8c",
+      "#28a745", "#ffc107", "#6610f2", "#dc3545", "#6c757d", "#343a40",
+      "#ff5722", "#00bcd4", "#8bc34a", "#ff9800", "#9c27b0", "#3f51b5",
+      "#795548", "#009688", "#c2185b", "#4caf50", "#ffeb3b"
+    ];
       let pontuacao = { acertos: 0, erros: 0 };
       let dados = [];
       let selectedMuseu = null;
