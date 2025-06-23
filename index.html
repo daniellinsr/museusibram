@@ -12,18 +12,15 @@
       background: linear-gradient(135deg, #e0f7fa, #e1bee7);
       color: #333;
     }
-
     h2 {
       text-align: center;
       margin-bottom: 0.5rem;
       color: #4a148c;
     }
-
     .controls {
       text-align: center;
       margin-bottom: 1rem;
     }
-
     button {
       padding: 0.6rem 1.2rem;
       margin: 0.5rem;
@@ -35,30 +32,25 @@
       color: white;
       transition: background 0.3s;
     }
-
     button:hover {
       background-color: #4a148c;
     }
-
     .score, .hint {
       font-weight: bold;
       font-size: 1rem;
       margin-top: 0.5rem;
     }
-
     .container {
       display: flex;
       flex-direction: column;
       gap: 2rem;
     }
-
     .drag-container, .drop-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
     }
-
     .draggable {
       padding: 0.6rem 1rem;
       color: white;
@@ -67,8 +59,12 @@
       font-weight: bold;
       user-select: none;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
-
+    .draggable:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
     .droppable {
       border: 2px dashed #7b1fa2;
       border-radius: 10px;
@@ -78,19 +74,12 @@
       background-color: white;
       text-align: center;
       position: relative;
-      transition: background 0.3s, border-color 0.3s;
+      transition: background 0.3s, border-color 0.3s, transform 0.2s;
     }
-
-    .droppable span {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-
     .droppable:hover {
       background-color: #f3e5f5;
+      transform: scale(1.02);
     }
-
     .dropped-item {
       margin-top: 6px;
       font-size: 0.9rem;
@@ -98,12 +87,11 @@
       border-radius: 8px;
       color: white;
       display: inline-block;
+      animation: fadeIn 0.5s ease-out;
     }
-
     .correct {
       background-color: #43a047;
     }
-
     #mensagemFinal, #dicaErro {
       position: fixed;
       top: 20%;
@@ -122,16 +110,22 @@
       z-index: 1000;
       animation: fadeZoom 0.6s ease forwards;
     }
-
     #dicaErro {
       background-color: #f44336;
     }
-
     @keyframes fadeZoom {
       0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
       100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
-
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
     @media (max-width: 600px) {
       .droppable {
         min-width: 100%;
@@ -156,133 +150,140 @@
 
   <h2>Conheça os Museus do Ibram - Associe cada museu ao estado correto</h2>
   <div class="controls">
-    <button onclick="iniciarJogo()">🔄 Reiniciar Jogo</button>
+    <button id="reiniciarJogo">🔄 Reiniciar Jogo</button>
     <span class="score" id="pontuacao">Acertos: 0 | Erros: 0</span>
   </div>
-
   <div class="container">
     <div class="drag-container" id="dragContainer"></div>
     <div class="drop-container" id="dropContainer"></div>
   </div>
-
   <script>
-    const dadosOriginais = [...]; // (Coloque os dados dos museus aqui como antes)
-    const cores = [...]; // (Paleta de cores como antes)
-    let pontuacao = { acertos: 0, erros: 0 };
-    let dados = [];
-    let selectedMuseu = null;
-    const isMobile = window.innerWidth <= 600;
+    document.addEventListener("DOMContentLoaded", function() {
+      const dadosOriginais = [...]; // (Coloque os dados dos museus aqui como antes)
+      const cores = [...]; // (Paleta de cores como antes)
+      let pontuacao = { acertos: 0, erros: 0 };
+      let dados = [];
+      let selectedMuseu = null;
+      const isMobile = window.innerWidth <= 600;
 
-    function atualizarPontuacao() {
-      document.getElementById("pontuacao").textContent = `Acertos: ${pontuacao.acertos} | Erros: ${pontuacao.erros}`;
-    }
+      function atualizarPontuacao() {
+        document.getElementById("pontuacao").textContent = `Acertos: ${pontuacao.acertos} | Erros: ${pontuacao.erros}`;
+      }
 
-    function mostrarMensagemFinal() {
-      const msg = document.getElementById("mensagemFinal");
-      msg.style.display = "block";
-      msg.style.opacity = "1";
-      setTimeout(() => {
-        msg.style.opacity = "0";
-        setTimeout(() => msg.style.display = "none", 500);
-      }, 4000);
-    }
+      function mostrarMensagemFinal() {
+        const msg = document.getElementById("mensagemFinal");
+        msg.style.display = "block";
+        msg.style.opacity = "1";
+        msg.style.animation = "pulse 1s infinite alternate";
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.animation = "none";
+          setTimeout(() => msg.style.display = "none", 500);
+        }, 4000);
+      }
 
-    function mostrarDicaErro() {
-      const dica = document.getElementById("dicaErro");
-      dica.style.display = "block";
-      dica.style.opacity = "1";
-      setTimeout(() => {
-        dica.style.opacity = "0";
-        setTimeout(() => dica.style.display = "none", 500);
-      }, 3000);
-    }
+      function mostrarDicaErro() {
+        const dica = document.getElementById("dicaErro");
+        dica.style.display = "block";
+        dica.style.opacity = "1";
+        dica.style.animation = "pulse 1s infinite alternate";
+        setTimeout(() => {
+          dica.style.opacity = "0";
+          dica.style.animation = "none";
+          setTimeout(() => dica.style.display = "none", 500);
+        }, 3000);
+      }
 
-    function iniciarJogo() {
-      const dragContainer = document.getElementById("dragContainer");
-      const dropContainer = document.getElementById("dropContainer");
-      dragContainer.innerHTML = "";
-      dropContainer.innerHTML = "";
-      pontuacao = { acertos: 0, erros: 0 };
-      selectedMuseu = null;
-      atualizarPontuacao();
-      dados = [...dadosOriginais];
-      dados.sort(() => Math.random() - 0.5);
+      function iniciarJogo() {
+        const dragContainer = document.getElementById("dragContainer");
+        const dropContainer = document.getElementById("dropContainer");
+        dragContainer.innerHTML = "";
+        dropContainer.innerHTML = "";
+        pontuacao = { acertos: 0, erros: 0 };
+        selectedMuseu = null;
+        atualizarPontuacao();
+        dados = [...dadosOriginais];
+        dados.sort(() => Math.random() - 0.5);
 
-      dados.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "draggable";
-        div.textContent = item.museu;
-        div.setAttribute("data-museu", item.museu);
-        div.style.backgroundColor = cores[index % cores.length];
+        dados.forEach((item, index) => {
+          const div = document.createElement("div");
+          div.className = "draggable";
+          div.textContent = item.museu;
+          div.setAttribute("data-museu", item.museu);
+          div.style.backgroundColor = cores[index % cores.length];
 
-        if (isMobile) {
-          div.addEventListener("click", () => {
-            document.querySelectorAll('.draggable').forEach(el => el.classList.remove("selected"));
-            selectedMuseu = item;
-            div.classList.add("selected");
-          });
-        } else {
-          div.setAttribute("draggable", true);
-          div.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("text/plain", item.museu);
-          });
-        }
-        dragContainer.appendChild(div);
-      });
+          if (isMobile) {
+            div.addEventListener("click", () => {
+              document.querySelectorAll('.draggable').forEach(el => el.classList.remove("selected"));
+              selectedMuseu = item;
+              div.classList.add("selected");
+              div.style.animation = "pulse 0.6s ease";
+            });
+          } else {
+            div.setAttribute("draggable", true);
+            div.addEventListener("dragstart", e => {
+              e.dataTransfer.setData("text/plain", item.museu);
+            });
+          }
+          dragContainer.appendChild(div);
+        });
 
-      [...new Set(dados.map(item => item.estado))].forEach(estado => {
-        const dropZone = document.createElement("div");
-        dropZone.className = "droppable";
-        dropZone.setAttribute("data-estado", estado);
+        [...new Set(dados.map(item => item.estado))].forEach(estado => {
+          const dropZone = document.createElement("div");
+          dropZone.className = "droppable";
+          dropZone.setAttribute("data-estado", estado);
 
-        const label = document.createElement("span");
-        label.textContent = estado;
-        dropZone.appendChild(label);
+          const label = document.createElement("span");
+          label.textContent = estado;
+          dropZone.appendChild(label);
 
-        if (isMobile) {
-          dropZone.addEventListener("click", () => {
-            if (!selectedMuseu) return;
-            const correto = dadosOriginais.find(d => d.museu === selectedMuseu.museu && d.estado === estado);
-            if (correto) {
-              adicionarAcerto(selectedMuseu.museu, dropZone);
-            } else {
-              pontuacao.erros++;
-              mostrarDicaErro();
-            }
-            atualizarPontuacao();
-            selectedMuseu = null;
-            document.querySelectorAll('.draggable').forEach(el => el.classList.remove("selected"));
-          });
-        } else {
-          dropZone.addEventListener("dragover", e => e.preventDefault());
-          dropZone.addEventListener("drop", e => {
-            e.preventDefault();
-            const museuNome = e.dataTransfer.getData("text/plain");
-            const itemCorreto = dadosOriginais.find(d => d.museu === museuNome);
-            if (itemCorreto && itemCorreto.estado === estado) {
-              adicionarAcerto(museuNome, dropZone);
-            } else {
-              pontuacao.erros++;
-              mostrarDicaErro();
-            }
-            atualizarPontuacao();
-          });
-        }
-        dropContainer.appendChild(dropZone);
-      });
-    }
+          if (isMobile) {
+            dropZone.addEventListener("click", () => {
+              if (!selectedMuseu) return;
+              const correto = dadosOriginais.find(d => d.museu === selectedMuseu.museu && d.estado === estado);
+              if (correto) {
+                adicionarAcerto(selectedMuseu.museu, dropZone);
+              } else {
+                pontuacao.erros++;
+                mostrarDicaErro();
+              }
+              atualizarPontuacao();
+              selectedMuseu = null;
+              document.querySelectorAll('.draggable').forEach(el => el.classList.remove("selected"));
+            });
+          } else {
+            dropZone.addEventListener("dragover", e => e.preventDefault());
+            dropZone.addEventListener("drop", e => {
+              e.preventDefault();
+              const museuNome = e.dataTransfer.getData("text/plain");
+              const itemCorreto = dadosOriginais.find(d => d.museu === museuNome);
+              if (itemCorreto && itemCorreto.estado === estado) {
+                adicionarAcerto(museuNome, dropZone);
+              } else {
+                pontuacao.erros++;
+                mostrarDicaErro();
+              }
+              atualizarPontuacao();
+            });
+          }
+          dropContainer.appendChild(dropZone);
+        });
+      }
 
-    function adicionarAcerto(museuNome, dropZone) {
-      pontuacao.acertos++;
-      const droppedItem = document.createElement("div");
-      droppedItem.className = "dropped-item correct";
-      droppedItem.textContent = museuNome;
-      dropZone.appendChild(droppedItem);
-      document.querySelector(`[data-museu="${museuNome}"]`)?.remove();
-      if (pontuacao.acertos === dadosOriginais.length) mostrarMensagemFinal();
-    }
+      function adicionarAcerto(museuNome, dropZone) {
+        pontuacao.acertos++;
+        const droppedItem = document.createElement("div");
+        droppedItem.className = "dropped-item correct";
+        droppedItem.textContent = museuNome;
+        dropZone.appendChild(droppedItem);
+        document.querySelector(`[data-museu="${museuNome}"]`)?.remove();
+        if (pontuacao.acertos === dadosOriginais.length) mostrarMensagemFinal();
+      }
 
-    iniciarJogo();
+      document.getElementById("reiniciarJogo").addEventListener("click", iniciarJogo);
+
+      iniciarJogo();
+    });
   </script>
 </body>
 </html>
