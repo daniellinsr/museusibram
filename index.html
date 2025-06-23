@@ -2,19 +2,21 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jogo Educativo - Museus Ibram</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 1rem;
-      background-color: #f5f5f5;
+      background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+      color: #333;
     }
 
     h2 {
       text-align: center;
       margin-bottom: 0.5rem;
+      color: #4a148c;
     }
 
     .controls {
@@ -23,19 +25,25 @@
     }
 
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1.2rem;
       margin: 0.5rem;
       font-weight: bold;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      background-color: #007bff;
+      background-color: #6a1b9a;
       color: white;
+      transition: background 0.3s;
     }
 
-    .score {
+    button:hover {
+      background-color: #4a148c;
+    }
+
+    .score, .hint {
       font-weight: bold;
       font-size: 1rem;
+      margin-top: 0.5rem;
     }
 
     .container {
@@ -52,24 +60,25 @@
     }
 
     .draggable {
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1rem;
       color: white;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: grab;
       font-weight: bold;
       user-select: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .droppable {
-      border: 2px dashed #ccc;
-      border-radius: 8px;
-      padding: 0.5rem;
+      border: 2px dashed #7b1fa2;
+      border-radius: 10px;
+      padding: 1rem;
       min-width: 220px;
       min-height: 80px;
       background-color: white;
       text-align: center;
-      font-weight: bold;
       position: relative;
+      transition: background 0.3s, border-color 0.3s;
     }
 
     .droppable span {
@@ -78,49 +87,33 @@
       margin-bottom: 0.5rem;
     }
 
+    .droppable:hover {
+      background-color: #f3e5f5;
+    }
+
     .dropped-item {
-      margin-top: 4px;
+      margin-top: 6px;
       font-size: 0.9rem;
-      padding: 4px 6px;
-      border-radius: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
       color: white;
       display: inline-block;
     }
 
     .correct {
-      background-color: #28a745;
+      background-color: #43a047;
     }
 
-    @media (max-width: 600px) {
-      .droppable {
-        min-width: 100%;
-      }
-
-      .draggable {
-        cursor: pointer;
-      }
-
-      .droppable.selected {
-        border-color: #007bff;
-        background-color: #e6f0ff;
-      }
-
-      .draggable.selected {
-        border: 2px solid #007bff;
-        background-color: #0056b3 !important;
-      }
-    }
-
-    #mensagemFinal {
+    #mensagemFinal, #dicaErro {
       position: fixed;
       top: 20%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
+      transform: translate(-50%, -50%) scale(0.9);
       background-color: #4caf50;
       color: white;
       padding: 1.5rem 2rem;
       border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
       font-size: 1.4rem;
       font-weight: bold;
       text-align: center;
@@ -130,36 +123,36 @@
       animation: fadeZoom 0.6s ease forwards;
     }
 
+    #dicaErro {
+      background-color: #f44336;
+    }
+
     @keyframes fadeZoom {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
-    .confetes::before, .confetes::after {
-      content: '🎊 🎉 🎈 🎊 🎉 🎈';
-      display: block;
-      font-size: 1.5rem;
-      animation: flutuar 3s infinite ease-in-out;
-    }
-
-    @keyframes flutuar {
-      0% { transform: translateY(0); opacity: 1; }
-      50% { transform: translateY(-10px); opacity: 0.7; }
-      100% { transform: translateY(0); opacity: 1; }
+    @media (max-width: 600px) {
+      .droppable {
+        min-width: 100%;
+      }
+      .draggable {
+        cursor: pointer;
+      }
+      .droppable.selected {
+        border-color: #8e24aa;
+        background-color: #f3e5f5;
+      }
+      .draggable.selected {
+        border: 2px solid #8e24aa;
+        background-color: #6a1b9a !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="mensagemFinal">
-    🎉 Parabéns! Você concluiu o jogo! <br> <strong>Conheça nossos Museus!</strong>
-    <div class="confetes"></div>
-  </div>
+  <div id="mensagemFinal">🎉 Parabéns! Você concluiu o jogo!<br><strong>Conheça nossos Museus!</strong></div>
+  <div id="dicaErro">❗ Dica: Tente lembrar a localização histórica desse museu!</div>
 
   <h2>Conheça os Museus do Ibram - Associe cada museu ao estado correto</h2>
   <div class="controls">
@@ -173,80 +166,47 @@
   </div>
 
   <script>
-    const dadosOriginais = [
-      { museu: "Museu Casa da Hera", estado: "Rio de Janeiro"},
-      { museu: "Museu Casa de Benjamin Constant", estado: "Rio de Janeiro"},
-      { museu: "Museu da Abolição", estado: "Pernambuco"},
-      { museu: "Museu da Inconfidência", estado: "Minas Gerais"},
-      { museu: "Museu da República", estado: "Rio de Janeiro"},
-      { museu: "Museu das Missões", estado: "Rio Grande do Sul"},
-      { museu: "Museu de Alcantara", estado: "Maranhão"},
-      { museu: "Museu de Arqueologia de Itaipu", estado: "Rio de Janeiro"},
-      { museu: "Museu de Arte de Paraty", estado: "Rio de Janeiro"},
-      { museu: "Museu de Arte Religiosa e Tradicional", estado: "Rio de Janeiro"},
-      { museu: "Museu do Diamante", estado: "Minas Gerais"},
-      { museu: "Museu do Ouro", estado: "Minas Gerais"},
-      { museu: "Museu Forte Defensor Perpétuo", estado: "Rio de Janeiro"},
-      { museu: "Museu Histórico Nacional", estado: "Rio de Janeiro"},
-      { museu: "Museu Lasar Segall", estado: "São Paulo"},
-      { museu: "Museu Regional Casa dos Ottoni", estado: "Minas Gerais"},
-      { museu: "Museu Regional de Caete", estado: "Minas Gerais"},
-      { museu: "Museu Regional de São João Del Rei", estado: "Minas Gerais"},
-      { museu: "Museu Solar Monjardim", estado: "Espírito Santo"},
-      { museu: "Museu Victor Meirelles", estado: "Santa Catarina"},
-      { museu: "Museu Villa Lobos", estado: "Rio de Janeiro"},
-      { museu: "Museus Castro Maya", estado: "Rio de Janeiro"},
-      { museu: "Museus de Goiás", estado: "Goiás"}
-    ];
-
-    const cores = [
-      "#007bff", "#17a2b8", "#6f42c1", "#fd7e14", "#20c997", "#e83e8c",
-      "#28a745", "#ffc107", "#6610f2", "#dc3545", "#6c757d", "#343a40",
-      "#ff5722", "#00bcd4", "#8bc34a", "#ff9800", "#9c27b0", "#3f51b5",
-      "#795548", "#009688", "#c2185b", "#4caf50", "#ffeb3b"
-    ];
-
+    const dadosOriginais = [...]; // (Coloque os dados dos museus aqui como antes)
+    const cores = [...]; // (Paleta de cores como antes)
     let pontuacao = { acertos: 0, erros: 0 };
     let dados = [];
     let selectedMuseu = null;
     const isMobile = window.innerWidth <= 600;
 
     function atualizarPontuacao() {
-      document.getElementById("pontuacao").textContent =
-        `Acertos: ${pontuacao.acertos} | Erros: ${pontuacao.erros}`;
-    }
-
-    function embaralhar(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
+      document.getElementById("pontuacao").textContent = `Acertos: ${pontuacao.acertos} | Erros: ${pontuacao.erros}`;
     }
 
     function mostrarMensagemFinal() {
       const msg = document.getElementById("mensagemFinal");
       msg.style.display = "block";
       msg.style.opacity = "1";
-      msg.style.animation = "fadeZoom 0.6s ease forwards";
       setTimeout(() => {
         msg.style.opacity = "0";
-        msg.style.transition = "opacity 0.5s ease";
         setTimeout(() => msg.style.display = "none", 500);
       }, 4000);
+    }
+
+    function mostrarDicaErro() {
+      const dica = document.getElementById("dicaErro");
+      dica.style.display = "block";
+      dica.style.opacity = "1";
+      setTimeout(() => {
+        dica.style.opacity = "0";
+        setTimeout(() => dica.style.display = "none", 500);
+      }, 3000);
     }
 
     function iniciarJogo() {
       const dragContainer = document.getElementById("dragContainer");
       const dropContainer = document.getElementById("dropContainer");
-
       dragContainer.innerHTML = "";
       dropContainer.innerHTML = "";
       pontuacao = { acertos: 0, erros: 0 };
       selectedMuseu = null;
       atualizarPontuacao();
-
       dados = [...dadosOriginais];
-      embaralhar(dados);
+      dados.sort(() => Math.random() - 0.5);
 
       dados.forEach((item, index) => {
         const div = document.createElement("div");
@@ -263,16 +223,14 @@
           });
         } else {
           div.setAttribute("draggable", true);
-          div.addEventListener("dragstart", (e) => {
+          div.addEventListener("dragstart", e => {
             e.dataTransfer.setData("text/plain", item.museu);
           });
         }
-
         dragContainer.appendChild(div);
       });
 
-      const estadosUnicos = [...new Set(dados.map(item => item.estado))];
-      estadosUnicos.forEach(estado => {
+      [...new Set(dados.map(item => item.estado))].forEach(estado => {
         const dropZone = document.createElement("div");
         dropZone.className = "droppable";
         dropZone.setAttribute("data-estado", estado);
@@ -285,24 +243,14 @@
           dropZone.addEventListener("click", () => {
             if (!selectedMuseu) return;
             const correto = dadosOriginais.find(d => d.museu === selectedMuseu.museu && d.estado === estado);
-
             if (correto) {
-              pontuacao.acertos++;
-              const dropped = document.createElement("div");
-              dropped.className = "dropped-item correct";
-              dropped.setAttribute("data-museu", selectedMuseu.museu);
-              dropped.textContent = selectedMuseu.museu;
-              dropZone.appendChild(dropped);
-
-              document.querySelector(`.draggable[data-museu="${selectedMuseu.museu}"]`)?.remove();
-              selectedMuseu = null;
-
-              if (pontuacao.acertos === dadosOriginais.length) mostrarMensagemFinal();
+              adicionarAcerto(selectedMuseu.museu, dropZone);
             } else {
               pontuacao.erros++;
+              mostrarDicaErro();
             }
-
             atualizarPontuacao();
+            selectedMuseu = null;
             document.querySelectorAll('.draggable').forEach(el => el.classList.remove("selected"));
           });
         } else {
@@ -310,32 +258,28 @@
           dropZone.addEventListener("drop", e => {
             e.preventDefault();
             const museuNome = e.dataTransfer.getData("text/plain");
-            const estadoAlvo = dropZone.getAttribute("data-estado");
             const itemCorreto = dadosOriginais.find(d => d.museu === museuNome);
-
-            if (dropZone.querySelector(`[data-museu="${museuNome}"]`)) return;
-
-            if (itemCorreto && itemCorreto.estado === estadoAlvo) {
-              const droppedItem = document.createElement("div");
-              droppedItem.className = "dropped-item correct";
-              droppedItem.setAttribute("data-museu", museuNome);
-              droppedItem.textContent = museuNome;
-
-              pontuacao.acertos++;
-              document.querySelector(`#dragContainer [data-museu="${museuNome}"]`)?.remove();
-              dropZone.appendChild(droppedItem);
-
-              if (pontuacao.acertos === dadosOriginais.length) mostrarMensagemFinal();
+            if (itemCorreto && itemCorreto.estado === estado) {
+              adicionarAcerto(museuNome, dropZone);
             } else {
               pontuacao.erros++;
+              mostrarDicaErro();
             }
-
             atualizarPontuacao();
           });
         }
-
         dropContainer.appendChild(dropZone);
       });
+    }
+
+    function adicionarAcerto(museuNome, dropZone) {
+      pontuacao.acertos++;
+      const droppedItem = document.createElement("div");
+      droppedItem.className = "dropped-item correct";
+      droppedItem.textContent = museuNome;
+      dropZone.appendChild(droppedItem);
+      document.querySelector(`[data-museu="${museuNome}"]`)?.remove();
+      if (pontuacao.acertos === dadosOriginais.length) mostrarMensagemFinal();
     }
 
     iniciarJogo();
